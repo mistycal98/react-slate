@@ -1,12 +1,12 @@
 import React, { useCallback, useMemo, useState } from "react";
-import { createEditor, Editor, Transforms } from "slate";
+import { createEditor, Editor, Transforms, Text } from "slate";
 import { Slate, Editable, withReact } from "slate-react";
 
 // Code Blocks
 import CodeElement from "../../components/CodeElement";
 import DefaultElement from "../../components/DefaultElement";
 
-const Text = () => {
+const TextComponent = () => {
 	const editor = useMemo(() => withReact(createEditor()), []);
 	const [value, setValue] = useState([
 		{
@@ -14,6 +14,7 @@ const Text = () => {
 			children: [{ text: "Start Entering text" }],
 		},
 	]);
+
 	const renderElement = useCallback((props) => {
 		switch (props.element.type) {
 			case "code":
@@ -22,6 +23,7 @@ const Text = () => {
 				return <DefaultElement {...props} />;
 		}
 	}, []);
+
 	return (
 		<div>
 			<h1>Slate Text Editor</h1>
@@ -33,15 +35,39 @@ const Text = () => {
 				<Editable
 					renderElement={renderElement}
 					onKeyDown={(event) => {
-						if (event.key === "`" && event.ctrlKey) {
-							// Prevent the "`" from being inserted by default.
-							event.preventDefault();
-							// Otherwise, set the currently selected blocks type to "code".
-							Transforms.setNodes(
-								editor,
-								{ type: "code" },
-								{ match: (n) => Editor.isBlock(editor, n) }
-							);
+						if (!event.ctrlKey) {
+							return;
+						}
+
+						switch (event.key) {
+							// When "`" is pressed, keep our existing code block logic.
+							case "`": {
+								event.preventDefault();
+								const [match] = Editor.nodes(editor, {
+									match: (n) => n.type === "code",
+								});
+								Transforms.setNodes(
+									editor,
+									{ type: match ? "paragraph" : "code" },
+									{ match: (n) => Editor.isBlock(editor, n) }
+								);
+								break;
+							}
+
+							// When "B" is pressed, bold the text in the selection.
+							case "b": {
+								event.preventDefault();
+								Transforms.setNodes(
+									editor,
+									{ bold: true },
+									// Apply it to text nodes, and split the text node up if the
+									// selection is overlapping only part of it.
+									{ match: (n) => Text.isText(n), split: true }
+								);
+								break;
+							}
+							default:
+								break;
 						}
 					}}
 				/>
@@ -50,4 +76,4 @@ const Text = () => {
 	);
 };
 
-export default Text;
+export default TextComponent;
