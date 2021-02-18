@@ -3,8 +3,11 @@ import { createEditor, Editor, Transforms, Text } from "slate";
 import { Slate, Editable, withReact } from "slate-react";
 
 // Code Blocks
-import CodeElement from "../../components/CodeElement";
-import DefaultElement from "../../components/DefaultElement";
+import CodeElement from "../../components/Text/CodeElement";
+import DefaultElement from "../../components/Text/DefaultElement";
+
+// Importing Leaf component
+import Leaf from "../../components/Text/Leaf";
 
 const TextComponent = () => {
 	const editor = useMemo(() => withReact(createEditor()), []);
@@ -24,6 +27,10 @@ const TextComponent = () => {
 		}
 	}, []);
 
+	const renderLeaf = useCallback((props) => {
+		return <Leaf {...props} />;
+	}, []);
+
 	return (
 		<div>
 			<h1>Slate Text Editor</h1>
@@ -34,6 +41,7 @@ const TextComponent = () => {
 			>
 				<Editable
 					renderElement={renderElement}
+					renderLeaf={renderLeaf}
 					onKeyDown={(event) => {
 						if (!event.ctrlKey) {
 							return;
@@ -59,13 +67,21 @@ const TextComponent = () => {
 								event.preventDefault();
 								Transforms.setNodes(
 									editor,
-									{ bold: true },
-									// Apply it to text nodes, and split the text node up if the
-									// selection is overlapping only part of it.
+									{ italic: true },
 									{ match: (n) => Text.isText(n), split: true }
 								);
 								break;
 							}
+
+							// Italic Case
+							case "i":
+								event.preventDefault();
+								Transforms.setNodes(
+									editor,
+									{ bold: true },
+									{ match: (n) => Text.isText(n), split: true }
+								);
+								break;
 							default:
 								break;
 						}

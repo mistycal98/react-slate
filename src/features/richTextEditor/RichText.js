@@ -1,15 +1,8 @@
 import React, { useCallback, useMemo, useState } from "react";
 import isHotkey from "is-hotkey";
-import { Editable, withReact, useSlate, Slate } from "slate-react";
-import {
-	Editor,
-	Transforms,
-	createEditor,
-	Element as SlateElement,
-} from "slate";
+import { Editable, withReact, Slate } from "slate-react";
+import { Editor, createEditor } from "slate";
 import { withHistory } from "slate-history";
-
-import { Button, Icon, Toolbar } from "../../components/RichTextFrags";
 
 const HOTKEYS = {
 	"mod+b": "bold",
@@ -18,32 +11,46 @@ const HOTKEYS = {
 	"mod+`": "code",
 };
 
-const LIST_TYPES = ["numbered-list", "bulleted-list"];
+// const LIST_TYPES = ["numbered-list", "bulleted-list"];
 
 const RichTextExample = () => {
-	const [value, setValue] = useState(initialValue);
+	// InitailState
+	const [value, setValue] = useState([
+		{
+			type: "paragraph",
+			children: [{ text: "First Line is Alway Reserved for Heading 👆" }],
+		},
+	]);
+
+	// Rendering Elememts
 	const renderElement = useCallback((props) => <Element {...props} />, []);
+
+	// Rendering Leaf Elememts : Selection
 	const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
+
+	// Defining Editor for editable
 	const editor = useMemo(() => withHistory(withReact(createEditor())), []);
 
 	return (
 		<Slate editor={editor} value={value} onChange={(value) => setValue(value)}>
-			<h1>Untitled</h1>
-			<Toolbar>
-				<MarkButton format="bold" icon="format_bold" />
-				<MarkButton format="italic" icon="format_italic" />
-				<MarkButton format="underline" icon="format_underlined" />
-				<MarkButton format="code" icon="code" />
-				<BlockButton format="heading-one" icon="looks_one" />
-				<BlockButton format="heading-two" icon="looks_two" />
-				<BlockButton format="block-quote" icon="format_quote" />
-				<BlockButton format="numbered-list" icon="format_list_numbered" />
-				<BlockButton format="bulleted-list" icon="format_list_bulleted" />
-			</Toolbar>
+			<h1
+				// contentEditable="true"
+				style={{
+					margin: "1rem auto",
+					textAlign: "center",
+					minHeight: "2rem",
+				}}
+			>
+				{value[0].children[0].text}
+			</h1>
+
 			<Editable
 				style={{
-					border: "1px solid teal",
-					padding: "0.1rem 1rem",
+					boxShadow: "0px 4px 8px 0px grey",
+					padding: "1rem 1rem",
+					minHeight: "500px",
+					width: "500px",
+					margin: "auto",
 				}}
 				renderElement={renderElement}
 				renderLeaf={renderLeaf}
@@ -64,28 +71,6 @@ const RichTextExample = () => {
 	);
 };
 
-const toggleBlock = (editor, format) => {
-	const isActive = isBlockActive(editor, format);
-	const isList = LIST_TYPES.includes(format);
-
-	Transforms.unwrapNodes(editor, {
-		match: (n) =>
-			LIST_TYPES.includes(
-				!Editor.isEditor(n) && SlateElement.isElement(n) && n.type
-			),
-		split: true,
-	});
-	const newProperties = {
-		type: isActive ? "paragraph" : isList ? "list-item" : format,
-	};
-	Transforms.setNodes(editor, newProperties);
-
-	if (!isActive && isList) {
-		const block = { type: format, children: [] };
-		Transforms.wrapNodes(editor, block);
-	}
-};
-
 const toggleMark = (editor, format) => {
 	const isActive = isMarkActive(editor, format);
 
@@ -94,15 +79,6 @@ const toggleMark = (editor, format) => {
 	} else {
 		Editor.addMark(editor, format, true);
 	}
-};
-
-const isBlockActive = (editor, format) => {
-	const [match] = Editor.nodes(editor, {
-		match: (n) =>
-			!Editor.isEditor(n) && SlateElement.isElement(n) && n.type === format,
-	});
-
-	return !!match;
 };
 
 const isMarkActive = (editor, format) => {
@@ -148,72 +124,5 @@ const Leaf = ({ attributes, children, leaf }) => {
 
 	return <span {...attributes}>{children}</span>;
 };
-
-const BlockButton = ({ format, icon }) => {
-	const editor = useSlate();
-	return (
-		<Button
-			active={isBlockActive(editor, format)}
-			onMouseDown={(event) => {
-				event.preventDefault();
-				toggleBlock(editor, format);
-			}}
-		>
-			<Icon>{icon}</Icon>
-		</Button>
-	);
-};
-
-const MarkButton = ({ format, icon }) => {
-	const editor = useSlate();
-	return (
-		<Button
-			active={isMarkActive(editor, format)}
-			onMouseDown={(event) => {
-				event.preventDefault();
-				toggleMark(editor, format);
-			}}
-		>
-			<Icon>{icon}</Icon>
-		</Button>
-	);
-};
-
-const initialValue = [
-	{
-		type: "paragraph",
-		children: [
-			{ text: "This is editable " },
-			{ text: "rich", bold: true },
-			{ text: " text, " },
-			{ text: "much", italic: true },
-			{ text: " better than a " },
-			{ text: "<textarea>", code: true },
-			{ text: "!" },
-		],
-	},
-	{
-		type: "paragraph",
-		children: [
-			{
-				text:
-					"Since it's rich text, you can do things like turn a selection of text ",
-			},
-			{ text: "bold", bold: true },
-			{
-				text:
-					", or add a semantically rendered block quote in the middle of the page, like this:",
-			},
-		],
-	},
-	{
-		type: "block-quote",
-		children: [{ text: "A wise quote." }],
-	},
-	{
-		type: "paragraph",
-		children: [{ text: "Try it out for yourself!" }],
-	},
-];
 
 export default RichTextExample;

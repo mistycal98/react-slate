@@ -15,66 +15,17 @@ import {
 	createEditor,
 	Element as SlateElement,
 } from "slate";
-import { css } from "@emotion/css";
 import { withHistory } from "slate-history";
-import CodeElement from "../../components/CodeElement";
-
-const initialValue = [
-	{
-		type: "paragraph",
-		children: [
-			{
-				text:
-					"With Slate you can build complex block types that have their own embedded content and behaviors, like rendering checkboxes inside check list items!",
-			},
-		],
-	},
-	{
-		type: "check-list-item",
-		checked: true,
-		children: [{ text: "Slide to the left." }],
-	},
-	{
-		type: "check-list-item",
-		checked: true,
-		children: [{ text: "Slide to the right." }],
-	},
-	{
-		type: "check-list-item",
-		checked: false,
-		children: [{ text: "Criss-cross." }],
-	},
-	{
-		type: "check-list-item",
-		checked: true,
-		children: [{ text: "Criss-cross!" }],
-	},
-	{
-		type: "check-list-item",
-		checked: false,
-		children: [{ text: "Cha cha real smooth…" }],
-	},
-	{
-		type: "check-list-item",
-		checked: false,
-		children: [{ text: "Let's go to work!" }],
-	},
-	{
-		type: "paragraph",
-		children: [{ text: "Try it out for yourself!" }],
-	},
-];
 
 const CheckListsExample = () => {
-	const [value, setValue] = useState(initialValue);
-	const renderElement = useCallback((props) => {
-		switch (props.element.type) {
-			case "code":
-				return <CodeElement />;
-			default:
-				return <Element {...props} />;
-		}
-	}, []);
+	const [value, setValue] = useState([
+		{
+			type: "check-list-item",
+			checked: false,
+			children: [{ text: "Integrate with RichText Editor" }],
+		},
+	]);
+	const renderElement = useCallback((props) => <Element {...props} />, []);
 	const editor = useMemo(
 		() => withChecklists(withHistory(withReact(createEditor()))),
 		[]
@@ -87,30 +38,6 @@ const CheckListsExample = () => {
 				placeholder="Get to work…"
 				spellCheck
 				autoFocus
-				onKeyDown={(e) => {
-					console.log(e.key);
-					if (!e.ctrlKey) {
-						return;
-					}
-
-					switch (e.key) {
-						case "`":
-							e.preventDefault();
-							const [match] = Editor.nodes(editor, {
-								match: (n) => n.type === "code",
-							});
-							Transforms.setNodes(
-								editor,
-								{ type: match ? "paragraph" : "code" },
-								{ match: (n) => Editor.isBlock(editor, n) }
-							);
-							break;
-						case "b":
-							break;
-						default:
-							break;
-					}
-				}}
 			/>
 		</Slate>
 	);
@@ -173,21 +100,17 @@ const CheckListItemElement = ({ attributes, children, element }) => {
 	return (
 		<div
 			{...attributes}
-			className={css`
-				display: flex;
-				flex-direction: row;
-				align-items: center;
-
-				& + & {
-					margin-top: 0;
-				}
-			`}
+			style={{
+				display: "flex",
+				flexDirection: "row",
+				alignItems: "center",
+			}}
 		>
 			<span
 				contentEditable={false}
-				className={css`
-					margin-right: 0.75em;
-				`}
+				style={{
+					marginRight: "0.75em",
+				}}
 			>
 				<input
 					type="checkbox"
@@ -204,15 +127,11 @@ const CheckListItemElement = ({ attributes, children, element }) => {
 			<span
 				contentEditable={!readOnly}
 				suppressContentEditableWarning
-				className={css`
-					flex: 1;
-					opacity: ${checked ? 0.666 : 1};
-					text-decoration: ${checked ? "none" : "line-through"};
-
-					&:focus {
-						outline: none;
-					}
-				`}
+				style={{
+					flex: "1",
+					opacity: `${checked ? 0.666 : 1}`,
+					textDecoration: `${checked ? "line-through" : "none"}`,
+				}}
 			>
 				{children}
 			</span>

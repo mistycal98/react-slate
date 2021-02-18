@@ -1,18 +1,17 @@
 import React from "react";
-// import { Counter } from "./features/counter/Counter";
+
+// Slate JS Components
 // import TextComponent from "./features/richTextEditor/Text";
-// import RichTextExample from "./features/richTextEditor/RichText";
-// import TextLogic from "./features/richTextEditor/TextLogic";
-import CheckListsExample from "./features/richTextEditor/Checklist";
+import RichTextExample from "./features/richTextEditor/RichText";
+import CheckListsExample from "./features/richTextEditor/Checklist.js"
+
 
 function App() {
 	return (
 		<div>
-			<CheckListsExample />
-			{/* <Counter /> */}
 			{/* <TextComponent /> */}
-			{/* <RichTextExample /> */}
-			{/* <TextLogic /> */}
+			<RichTextExample />
+			<CheckListsExample />
 		</div>
 	);
 }
