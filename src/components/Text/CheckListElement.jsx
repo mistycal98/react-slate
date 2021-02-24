@@ -1,6 +1,7 @@
 import React from "react";
 import { useEditor, useReadOnly, ReactEditor } from "slate-react";
 import { Transforms } from "slate";
+
 const CheckListItemElement = ({ attributes, children, element }) => {
   const editor = useEditor();
   const readOnly = useReadOnly();
