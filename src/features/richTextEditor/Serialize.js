@@ -1,36 +1,37 @@
-import React, { useState } from "react";
-import escapeHtml from "escape-html";
-import { Node, Text } from "slate";
+import escapeHTML from "escape-html";
+import { Text } from "slate";
 
-const Serialize = () => {
-  const [nodes, setnodes] = useState([
-    {
-      type: "paragraph",
-      children: [{ text: "An opening paragraph..." }],
-    },
-    {
-      type: "quote",
-      children: [{ text: "A wise quote." }],
-    },
-    {
-      type: "paragraph",
-      children: [{ text: "A closing paragraph!" }],
-    },
-  ]);
+// Serialize Action
+export const serializeNode = (node) => {
+  console.log(node);
+  if (Text?.isText(node)) {
+    return escapeHTML(node.text);
+  }
+  // const children = node.children?.map((n) => serialize(n)).join("");
 
-  // Serialize -----> To Plain Text
-  const normalSerialize = (value) => {
-    return value.map((n) => Node.string(n)).join("\n");
-  };
-
-  // Serialize to HTML using escape-html package
-
-  console.log(normalSerialize(nodes));
-//   let newchar = escapeHtml(nodes);
-
-//   console.log(JSON.stringify(newchar));
-  
-  return <div>Hello World</div>;
+  const children = node?.childen?.map((child) => serializeNode(child)).join("");
+  switch (node.type) {
+    case "title":
+      return `<title>${children}</title>`;
+    case "paragraph":
+      return `<p>${children}</p>`;
+    case "quote":
+      return `<blockquote><p>${children}</p></blockquote>`;
+    case "block-quote":
+      return `<blockquote>${children}</blockquote>`;
+    case "bulleted-list":
+      return `<ul>${children}</ul>`;
+    case "heading-one":
+      return `<h1>${children}</h1>`;
+    case "heading-two":
+      return `<h2>${children}</h2>`;
+    case "list-item":
+      return `<li>${children}</li>`;
+    case "numbered-list":
+      return `<ol>${children}</ol>`;
+    case "check-list-item":
+      return `<checklist>${children}</checklist>`;
+    default:
+      return `<div>${children}</div>`;
+  }
 };
-
-export default Serialize;

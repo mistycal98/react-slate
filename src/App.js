@@ -5,7 +5,7 @@ import React from "react";
 import RichTextExample from "./features/richTextEditor/RichText";
 // import Serialize from "./features/richTextEditor/Serialize";
 // import CheckListsExample from "./features/richTextEditor/Checklist.js";
-import HtmlSerialize from "./features/richTextEditor/HtmlSerialize";
+// import HtmlSerialize from "./features/richTextEditor/HtmlSerialize";
 
 function App() {
   const onSave = (slateValue) => console.log(slateValue)

@@ -1,6 +1,6 @@
 import React from "react";
 import { useEditor, useReadOnly, ReactEditor } from "slate-react";
-import { Transforms } from "slate";
+import { Editor, Point, Transforms, Element as SlateElement } from "slate";
 
 const CheckListItemElement = ({ attributes, children, element }) => {
   const editor = useEditor();
@@ -47,4 +47,38 @@ const CheckListItemElement = ({ attributes, children, element }) => {
     </div>
   );
 };
+
+export const withChecklists = (editor) => {
+  const { deleteBackward } = editor;
+
+  editor.deleteBackward = (...args) => {
+    const { selection } = editor;
+
+    if (selection && Range.isCollapsed(selection)) {
+      const [match] = Editor.nodes(editor, {
+        match: (n) => !Editor.isEditor(n) && SlateElement.isElement(n) && n.type === "check-list-item",
+      });
+
+      if (match) {
+        const [, path] = match;
+        const start = Editor.start(editor, path);
+
+        if (Point.equals(selection.anchor, start)) {
+          const newProperties = {
+            type: "paragraph",
+          };
+          Transforms.setNodes(editor, newProperties, {
+            match: (n) => !Editor.isEditor(n) && SlateElement.isElement(n) && n.type === "check-list-item",
+          });
+          return;
+        }
+      }
+    }
+
+    deleteBackward(...args);
+  };
+
+  return editor;
+};
+
 export default CheckListItemElement;
